@@ -1,4 +1,10 @@
 sanic==22.6.2
-diffusers==0.2.3
-transformers
 scipy
+--extra-index-url https://download.pytorch.org/whl/cu113
+torch==1.13.0
+torchvision
+git+https://github.com/huggingface/diffusers.git@30f6f44
+transformers
+accelerate
+ftfy
+python-dotenv

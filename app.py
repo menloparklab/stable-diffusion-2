@@ -1,6 +1,6 @@
 import torch
 from torch import autocast
-from diffusers import StableDiffusionPipeline, LMSDiscreteScheduler
+from diffusers import DiffusionPipeline, EulerDiscreteScheduler
 import base64
 from io import BytesIO
 import os
@@ -11,11 +11,12 @@ def init():
     global model
     HF_AUTH_TOKEN = os.getenv("HF_AUTH_TOKEN")
     
-    # this will substitute the default PNDM scheduler for K-LMS  
-    lms = LMSDiscreteScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear")
-
-    model = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", scheduler=lms, use_auth_token=HF_AUTH_TOKEN).to("cuda")
-
+    
+    repo_id = "stabilityai/stable-diffusion-2"
+    scheduler = EulerDiscreteScheduler.from_pretrained(repo_id, subfolder="scheduler", prediction_type="v_prediction")
+    model = DiffusionPipeline.from_pretrained(repo_id, torch_dtype=torch.float16, revision="fp16", scheduler=scheduler,use_auth_token=HF_AUTH_TOKEN).to("cuda")
+    model.enable_xformers_memory_efficient_attention()
+    
 # Inference is ran for every server call
 # Reference your preloaded global model variable here.
 def inference(model_inputs:dict) -> dict:
